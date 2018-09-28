@@ -6,8 +6,8 @@ import os
 import xml.etree.ElementTree as elementTree
 import reportlab.lib.pagesizes as sizes
 import reportlab.lib.units as layout_units
-import reportlab.pdfgen.canvas as canvas
-from reportlab.lib import colors as repColors
+import reportlab.pdfgen.canvas as pdf_canvas
+from reportlab.lib import colors as reportlab_colors
 from reportlab.platypus import Table, TableStyle
 from reportlab.platypus import Frame
 from reportlab.platypus import Paragraph
@@ -22,7 +22,7 @@ class Converter():
         self.file_path = ""
         self.output_path = ""
 
-        self.colors = {}
+        self.colors = []
         self.used_colors = {}
         self.styles = {}
         self.royal_blue = (0 / 256, 85 / 256, 164 / 256)
@@ -30,24 +30,24 @@ class Converter():
         self.bvb_yellow = (255 / 256, 232 / 256, 0 / 256)
 
     def main(self):
-        self.getFilePaths()
+        self.get_file_paths()
         xml_tree = elementTree.parse(self.file_path)
 
-        entries = self.getEntriesFromXml(xml_tree)
-        self.createPdf(entries)
-        self.openOutputFile(self.output_path)
+        entries = self.get_entries_from_xml(xml_tree)
+        self.create_pdf(entries)
+        self.open_output_file(self.output_path)
 
-    def getFilePaths(self):
+    def get_file_paths(self):
         if len(sys.argv) > 1:
             self.file_path = sys.argv[1]
         else:
             import tkinter.filedialog as fileDialog
-            Converter.initializeTkinter(self)
+            Converter.initialize_tkinter(self)
             self.file_path = fileDialog.askopenfilename()
 
         self.output_path = self.file_path[:-3] + "pdf"
 
-    def checkAndEscape(self, string):
+    def check_and_escape(self, string):
         # reportLab can't handle gifs (they cause a hard crash), escape if one is present
         try:
             Paragraph(string, getSampleStyleSheet()['BodyText'])
@@ -55,7 +55,7 @@ class Converter():
         except ValueError:
             return html.escape(string)
 
-    def removeExcessiveNewLines(self, string):
+    def remove_excessive_new_lines(self, string):
         newlines = 0
         index = string.find('\n')
 
@@ -69,15 +69,15 @@ class Converter():
         # not too many new lines, return string unchanged
         return string
 
-    def initializeTkinter(self):
+    def initialize_tkinter(self):
         import tkinter as tk
         root = tk.Tk()
         root.withdraw()
 
-    def getEntriesFromXml(self, xmlTree):
+    def get_entries_from_xml(self, xml_tree):
         entries = []
 
-        for item in xmlTree.iter("item"):
+        for item in xml_tree.iter("item"):
             entry = {}
 
             entry["summary"] = item.find("summary").text
@@ -90,47 +90,47 @@ class Converter():
             entry["key"] = split[1]
 
             entry["priority"] = item.find("priority").text
-            entry["rank"] = self.extractRankFromCustomfields(item)
-            entry["label"] = self.extractLabel(item)
+            entry["rank"] = self.extract_rank_from_custom_fields(item)
+            entry["label"] = self.extract_label(item)
 
-            self.extractComponent(entry, item)
+            self.extract_component(entry, item)
 
-            self.removeNullValues(entry)
+            self.remove_null_values(entry)
             entries.append(entry)
 
         return entries
 
-    def extractComponent(self, entry, item):
+    def extract_component(self, entry, item):
         component = item.find("component")
         if component is None:
             entry["component"] = ""
         else:
             entry["component"] = component.text
 
-    def removeNullValues(self, entry):
+    def remove_null_values(self, entry):
         for key in entry.keys():
             if entry[key] == None:
                 entry[key] = ''
 
-    def extractLabel(self, item):
+    def extract_label(self, item):
+        label = ''
         for label_tag in item.iter("labels"):
             label_value = label_tag.find("label")
             if label_value is not None:
                 label = label_value.text
-            else:
-                label = ''
         return label
 
-    def createPdf(self, entries):
+    def create_pdf(self, entries):
         self.load_colors()
 
-        c = canvas.Canvas(filename=self.output_path, bottomup=1, pagesize=sizes.landscape(sizes.A4))
+        canvas = pdf_canvas.Canvas(filename=self.output_path, bottomup=1,
+                                   pagesize=sizes.landscape(sizes.A4))
 
         for entry in entries:
 
             for key in entry.keys():
                 entry[key] = self.remove_link_tags(entry[key])
-                entry[key] = self.checkAndEscape(entry[key])
+                entry[key] = self.check_and_escape(entry[key])
 
             assignee = entry["assignee"]
             project = entry["project"]
@@ -140,7 +140,7 @@ class Converter():
             first_line_style = "firstLine"
 
             if project == "KSCPI" and component != "Document Service":
-                card_color = repColors.black
+                card_color = reportlab_colors.black
                 first_line_style = "firstLineAlt"
             else:
                 if label == "CF":
@@ -150,10 +150,10 @@ class Converter():
                     card_color = self.royal_blue
                     first_line_style = "firstLineStyleUnassigned"
                 else:
-                    card_color = self.getCardColor(assignee)
+                    card_color = self.get_card_color(assignee)
 
             frame_content = []
-            table_data = self.getTableData(assignee, entry, first_line_style)
+            table_data = self.get_table_data(assignee, entry, first_line_style)
 
             card_frame = Frame(self.start_x, self.start_y, width=14.5 * layout_units.cm,
                                height=8.5 * layout_units.cm, showBoundary=0)
@@ -162,20 +162,20 @@ class Converter():
                                      ('VALIGN', (0, 0), (1, 0), "MIDDLE"),
                                      ('BOTTOMPADDING', (0, 0), (1, 0), 14),
                                      ('VALIGN', (0, 1), (-1, -1), "TOP"),
-                                     ('INNERGRID', (0, 0), (-1, -1), 0.9, repColors.black),
-                                     ('BOX', (0, 0), (-1, -1), 0.9, repColors.black)])
+                                     ('INNERGRID', (0, 0), (-1, -1), 0.9, reportlab_colors.black),
+                                     ('BOX', (0, 0), (-1, -1), 0.9, reportlab_colors.black)])
 
-            table = Table(table_data, colWidths=[2.7 * layout_units.cm, 11.3 * layout_units.cm],
+            table = Table(data=table_data, colWidths=[2.7 * layout_units.cm, 11.3 * layout_units.cm],
                           rowHeights=[1.2 * layout_units.cm, 3.4 * layout_units.cm,
                                       2.1 * layout_units.cm, 1.2 * layout_units.cm])
             table.setStyle(card_style)
 
             frame_content.append(table)
 
-            card_frame.addFromList(frame_content, c)
+            card_frame.addFromList(frame_content, canvas)
 
-            self.getNewCardPosition(c)
-        c.save()
+            self.get_new_card_position(canvas)
+        canvas.save()
 
     def load_colors(self):
         olive = (192 / 256, 255 / 256, 62 / 256)
@@ -193,14 +193,14 @@ class Converter():
                        pale_green, light_grey, dark_turquoise, dark_orange, medium_purple]
 
     def remove_link_tags(self, string):
-        tagStartIndex = string.find("<a href")
-        while (tagStartIndex) != -1:
-            endIndex = string.find("</a>", tagStartIndex)
-            string = string[0:tagStartIndex] + " <i>link</i> " + string[endIndex + 4:]
-            tagStartIndex = string.find("<a href")
+        tag_start_index = string.find("<a href")
+        while (tag_start_index) != -1:
+            end_index = string.find("</a>", tag_start_index)
+            string = string[0:tag_start_index] + " <i>link</i> " + string[end_index + 4:]
+            tag_start_index = string.find("<a href")
         return string
 
-    def getCardColor(self, assignee):
+    def get_card_color(self, assignee):
         if assignee in self.used_colors:
             card_color = self.used_colors[assignee]
         else:
@@ -210,13 +210,13 @@ class Converter():
 
         return card_color
 
-    def getTableData(self, assignee, entry, firstLineStyle):
+    def get_table_data(self, assignee, entry, first_line_style):
 
-        self.loadStyles()
+        self.load_styles()
 
-        rank_paragraph = Paragraph(entry["rank"], self.styles[firstLineStyle])
+        rank_paragraph = Paragraph(entry["rank"], self.styles[first_line_style])
 
-        priority_paragraph = Paragraph(entry["priority"], self.styles[firstLineStyle])
+        priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
         desc_label_paragraph = Paragraph("Description:", self.styles["label"])
         key_paragraph = Paragraph(entry["key"], self.styles["summary"])
@@ -227,7 +227,7 @@ class Converter():
         if len(description_string) > 160:
             description_string = description_string[0:161] + '...'
 
-        description_string = self.removeExcessiveNewLines(description_string)
+        description_string = self.remove_excessive_new_lines(description_string)
 
         try:
             description_paragraph = Paragraph(description_string, self.styles["description"])
@@ -250,7 +250,7 @@ class Converter():
                 [processor_label_paragraph, processor_paragraph]]
         return data
 
-    def loadStyles(self):
+    def load_styles(self):
         first_line_style = ParagraphStyle(name="firstLine", fontName='Helvetica-Bold',
                                           fontSize=18, alignment=0)
         self.styles["firstLine"] = first_line_style
@@ -262,12 +262,12 @@ class Converter():
 
         first_line_style_red = ParagraphStyle(name="firstLineRed", fontName='Helvetica-Bold',
                                               fontSize=18, alignment=0,
-                                              textColor=repColors.white)
+                                              textColor=reportlab_colors.white)
         self.styles["firstLineRed"] = first_line_style_red
 
         first_line_style_unassigned = ParagraphStyle(name="firstLineUnassigned",
                                                      fontName='Helvetica-Bold', fontSize=18,
-                                                     alignment=0, textColor=repColors.white)
+                                                     alignment=0, textColor=reportlab_colors.white)
         self.styles["firstLineStyleUnassigned"] = first_line_style_unassigned
 
         summary_style = ParagraphStyle(name="summary", fontName='Helvetica-Bold',
@@ -290,7 +290,7 @@ class Converter():
                                      fontSize=12, alignment=0, leftIndent=0)
         self.styles["label"] = label_style
 
-    def getNewCardPosition(self, c):
+    def get_new_card_position(self, canvas):
         if self.frame_count == 1:
             self.frame_count += 1
             self.start_x += 410
@@ -305,28 +305,28 @@ class Converter():
             self.frame_count = 1
             self.start_x = 10
             self.start_y = 325
-            c.showPage()
+            canvas.showPage()
 
-    def extractRankFromCustomfields(self, item):
+    def extract_rank_from_custom_fields(self, item):
         rank = "0"
-        for customfield in item.iter("customfield"):
-            if customfield.find("customfieldname").text == "Rank":
-                for values in customfield.iter("customfieldvalue"):
+        for custom_field in item.iter("customfield"):
+            if custom_field.find("customfieldname").text == "Rank":
+                for values in custom_field.iter("customfieldvalue"):
                     rank = values.text
                     # replace ':' in case the rank gets too short
                     # rank = rank.replace(":", "")
 
         return rank
 
-    def openOutputFile(self, filePath):
+    def open_output_file(self, file_path):
         if sys.platform == "win32":
-            os.startfile(filePath)
+            os.startfile(file_path)
         elif sys.platform == "darwin":  # mac
-            subprocess.call(["open", filePath])
+            subprocess.call(["open", file_path])
         else:  # linux
-            subprocess.call(["xdg-open", filePath])
+            subprocess.call(["xdg-open", file_path])
 
 
 if __name__ == '__main__':
-    conv = Converter()
-    conv.main()
+    CONV = Converter()
+    CONV.main()

@@ -42,7 +42,7 @@ class myTestCase(unittest.TestCase):
         classUnderTest = XMLParser.Converter()
         testString = "A text \n with \n too \n many \n new \n lines"
         expectedResult = "A text \n with \n too \n many "
-        actualString = classUnderTest.removeExcessiveNewLines(testString)
+        actualString = classUnderTest.remove_excessive_new_lines(testString)
 
         self.assertEqual(actualString, expectedResult)
 
