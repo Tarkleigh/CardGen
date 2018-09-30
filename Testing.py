@@ -1,50 +1,51 @@
 import unittest
 import XMLParser
 
-class myTestCase(unittest.TestCase):
+
+class MyTestCase(unittest.TestCase):
 
     def test_Parser(self):
-        self.assertEqual(1,1)
+        self.assertEqual(1, 1)
 
     def testColors(self):
-        classUnderTest = XMLParser.Converter()
-        classUnderTest.load_colors()
-        actualcolors = classUnderTest.colors
+        class_under_test = XMLParser.Converter()
+        class_under_test.load_colors()
+        actual_colors = class_under_test.colors
 
-        self.assertEqual(len(actualcolors), 10)
+        self.assertEqual(len(actual_colors), 10)
 
     def testLinkRemoval(self):
-        classUnderTest = XMLParser.Converter()
-        testString = "Text<a href=bla></a>weitererText"
-        expectedResult = "Text <i>link</i> weitererText"
-        actualString = classUnderTest.remove_link_tags(testString)
+        class_under_test = XMLParser.Converter()
+        test_string = "Text<a href=bla></a>moreText"
+        expected_string = "Text <i>link</i> moreText"
+        actual_string = class_under_test.remove_link_tags(test_string)
 
-        # self.assertEqual(actualString,expectedResult)
-        self.assertEqual(expectedResult, actualString)
+        self.assertEqual(expected_string, actual_string)
 
     def testComplexLinkRemoval(self):
-        classUnderTest = XMLParser.Converter()
-        testString = "Text<a href=bla></a>weitererText<a href=blubb></a>"
-        expectedResult = "Text <i>link</i> weitererText <i>link</i> "
-        actualString = classUnderTest.remove_link_tags(testString)
+        class_under_test = XMLParser.Converter()
+        test_string = "Text<a href=bla></a>moreText<a href=www.google.com></a>"
+        expected_string = "Text <i>link</i> moreText <i>link</i> "
+        actualString = class_under_test.remove_link_tags(test_string)
 
-        self.assertEqual(expectedResult, actualString)
+        self.assertEqual(expected_string, actualString)
 
     def testLinkRemovalWithOtherATag(self):
-        classUnderTest = XMLParser.Converter()
-        testString = "Text <a name=noHyperLink></a> weitererText<a href=relevanterTagb></a>"
-        expectedResult = "Text <a name=noHyperLink></a> weitererText <i>link</i> "
-        actualString = classUnderTest.remove_link_tags(testString)
+        class_under_test = XMLParser.Converter()
+        test_string = "Text <a name=noHyperLink></a> moreText<a href=importantTag></a>"
+        expected_string = "Text <a name=noHyperLink></a> moreText <i>link</i> "
+        actual_string = class_under_test.remove_link_tags(test_string)
 
-        self.assertEqual(expectedResult, actualString)
+        self.assertEqual(expected_string, actual_string)
 
     def testLineRemoval(self):
-        classUnderTest = XMLParser.Converter()
-        testString = "A text \n with \n too \n many \n new \n lines"
-        expectedResult = "A text \n with \n too \n many "
-        actualString = classUnderTest.remove_excessive_new_lines(testString)
+        class_under_test = XMLParser.Converter()
+        test_string = "A text \n with \n too \n many \n new \n lines"
+        expected_result = "A text \n with \n too \n many "
+        actual_string = class_under_test.remove_excessive_new_lines(test_string)
 
-        self.assertEqual(actualString, expectedResult)
+        self.assertEqual(actual_string, expected_result)
+
 
 if __name__ == '__main__':
     unittest.main()
