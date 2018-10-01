@@ -137,6 +137,7 @@ class Converter():
             component = entry["component"]
 
             first_line_style = "firstLine"
+            text_color = ""
 
             if label == "CF":
                 card_color = self.bavarian_red
@@ -144,11 +145,13 @@ class Converter():
             elif assignee == "Unassigned":
                 card_color = self.royal_blue
                 first_line_style = "firstLineStyleUnassigned"
+                text_color = reportlab_colors.white
             else:
                 card_color = self.get_card_color(assignee)
+                text_color = reportlab_colors.black
 
             frame_content = []
-            table_data = self.get_table_data(assignee, entry, first_line_style)
+            table_data = self.get_table_data(assignee, entry, first_line_style, text_color)
 
             card_frame = Frame(self.start_x, self.start_y, width=14.5 * layout_units.cm,
                                height=8.5 * layout_units.cm, showBoundary=0)
@@ -205,11 +208,15 @@ class Converter():
 
         return card_color
 
-    def get_table_data(self, assignee, entry, first_line_style):
+    def get_table_data(self, assignee, entry, first_line_style, text_color):
 
-        self.load_styles()
+        self.load_styles(text_color)
 
-        rank_paragraph = Paragraph(entry["rank"], self.styles[first_line_style])
+        rank = entry["rank"]
+        if len(rank) >= 6:
+            rank_paragraph = Paragraph(entry["rank"], self.styles["largeRankStyle"])
+        else:
+            rank_paragraph = Paragraph(entry["rank"], self.styles[first_line_style])
 
         priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
@@ -245,7 +252,7 @@ class Converter():
                 [processor_label_paragraph, processor_paragraph]]
         return data
 
-    def load_styles(self):
+    def load_styles(self, text_color):
         first_line_style = ParagraphStyle(name="firstLine", fontName='Helvetica-Bold',
                                           fontSize=18, alignment=0)
         self.styles["firstLine"] = first_line_style
@@ -264,6 +271,12 @@ class Converter():
                                                      fontName='Helvetica-Bold', fontSize=18,
                                                      alignment=0, textColor=reportlab_colors.white)
         self.styles["firstLineStyleUnassigned"] = first_line_style_unassigned
+
+        large_rank_style = ParagraphStyle(name="largeRankStyle",
+                                          fontName='Helvetica-Bold', fontSize=13,
+                                          alignment=0, textColor=text_color)
+
+        self.styles["largeRankStyle"] = large_rank_style
 
         summary_style = ParagraphStyle(name="summary", fontName='Helvetica-Bold',
                                        fontSize=22, alignment=0, leading=22)
