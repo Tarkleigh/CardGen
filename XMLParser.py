@@ -133,24 +133,19 @@ class Converter():
                 entry[key] = self.check_and_escape(entry[key])
 
             assignee = entry["assignee"]
-            project = entry["project"]
             label = entry["label"]
             component = entry["component"]
 
             first_line_style = "firstLine"
 
-            if project == "KSCPI" and component != "Document Service":
-                card_color = reportlab_colors.black
-                first_line_style = "firstLineAlt"
+            if label == "CF":
+                card_color = self.bavarian_red
+                first_line_style = "firstLineRed"
+            elif assignee == "Unassigned":
+                card_color = self.royal_blue
+                first_line_style = "firstLineStyleUnassigned"
             else:
-                if label == "CF":
-                    card_color = self.bavarian_red
-                    first_line_style = "firstLineRed"
-                elif assignee == "Unassigned":
-                    card_color = self.royal_blue
-                    first_line_style = "firstLineStyleUnassigned"
-                else:
-                    card_color = self.get_card_color(assignee)
+                card_color = self.get_card_color(assignee)
 
             frame_content = []
             table_data = self.get_table_data(assignee, entry, first_line_style)
