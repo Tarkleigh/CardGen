@@ -15,16 +15,16 @@ def get_entries_from_xml(xml_tree):
     for item in xml_tree.iter("item"):
         entry = {}
 
-        entry["summary"] = item.find("summary").text
-        entry["description"] = item.find("description").text
-        entry["assignee"] = item.find("assignee").text
+        entry["summary"] = extract_value(item, "summary")
+        entry["description"] = extract_value(item, "description")
+        entry["assignee"] = extract_value(item, "assignee")
 
-        key = item.find("key").text
+        key = extract_value(item, "key")
         split = key.split("-")
         entry["project"] = split[0]
         entry["key"] = split[1]
 
-        entry["priority"] = item.find("priority").text
+        entry["priority"] = extract_value(item, "priority")
         entry["rank"] = extract_rank_from_custom_fields(item)
 
         remove_null_values(entry)
@@ -36,6 +36,14 @@ def get_entries_from_xml(xml_tree):
         entries.append(entry)
 
     return entries
+
+
+def extract_value(item, key):
+    value = item.find(key).text
+    if value is None:
+        value = ""
+
+    return value
 
 
 def initialize_tkinter():
