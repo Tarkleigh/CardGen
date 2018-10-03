@@ -26,7 +26,6 @@ def get_entries_from_xml(xml_tree):
 
         entry["priority"] = item.find("priority").text
         entry["rank"] = extract_rank_from_custom_fields(item)
-        entry["label"] = extract_label(item)
 
         remove_null_values(entry)
 
@@ -68,19 +67,11 @@ def remove_excessive_new_lines(string):
     # not too many new lines, return string unchanged
     return string
 
+
 def remove_null_values(entry):
     for key in entry.keys():
         if entry[key] is None:
             entry[key] = ''
-
-
-def extract_label(item):
-    label = ''
-    for label_tag in item.iter("labels"):
-        label_value = label_tag.find("label")
-        if label_value is not None:
-            label = label_value.text
-    return label
 
 
 def remove_link_tags(string):
@@ -98,8 +89,6 @@ def extract_rank_from_custom_fields(item):
         if custom_field.find("customfieldname").text == "Rank":
             for values in custom_field.iter("customfieldvalue"):
                 rank = values.text
-                # replace ':' in case the rank gets too short
-                # rank = rank.replace(":", "")
 
     return rank
 

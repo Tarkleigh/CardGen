@@ -11,20 +11,17 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 import XMLParser
 
 
-class Converter():
+class Converter:
     def __init__(self, output_path):
         self.start_x = 10
         self.start_y = 325
         self.frame_count = 1
-        self.file_path = ""
         self.output_path = ""
 
         self.colors = []
         self.used_colors = {}
         self.styles = {}
         self.royal_blue = (0 / 256, 85 / 256, 164 / 256)
-        self.bavarian_red = (223 / 256, 33 / 256, 39 / 256)
-        self.bvb_yellow = (255 / 256, 232 / 256, 0 / 256)
         self.output_path = output_path
 
     def create_pdf(self, entries):
@@ -36,16 +33,9 @@ class Converter():
         for entry in entries:
 
             assignee = entry["assignee"]
-            label = entry["label"]
-
             first_line_style = "firstLine"
-            text_color = ""
 
-            if label == "CF":
-                card_color = self.bavarian_red
-                first_line_style = "firstLineRed"
-                text_color = reportlab_colors.white
-            elif assignee == "Unassigned":
+            if assignee == "Unassigned":
                 card_color = self.royal_blue
                 first_line_style = "firstLineStyleUnassigned"
                 text_color = reportlab_colors.white
@@ -72,10 +62,9 @@ class Converter():
             table.setStyle(card_style)
 
             frame_content.append(table)
-
             card_frame.addFromList(frame_content, canvas)
-
             self.get_new_card_position(canvas)
+
         canvas.save()
 
     def load_colors(self):
@@ -151,16 +140,6 @@ class Converter():
         first_line_style = ParagraphStyle(name="firstLine", fontName='Helvetica-Bold',
                                           fontSize=18, alignment=0)
         self.styles["firstLine"] = first_line_style
-
-        first_line_style_alt = ParagraphStyle(name="firstLineAlt", fontName='Helvetica-Bold',
-                                              fontSize=18, alignment=0,
-                                              textColor=self.bvb_yellow)
-        self.styles["firstLineAlt"] = first_line_style_alt
-
-        first_line_style_red = ParagraphStyle(name="firstLineRed", fontName='Helvetica-Bold',
-                                              fontSize=18, alignment=0,
-                                              textColor=reportlab_colors.white)
-        self.styles["firstLineRed"] = first_line_style_red
 
         first_line_style_unassigned = ParagraphStyle(name="firstLineUnassigned",
                                                      fontName='Helvetica-Bold', fontSize=18,
