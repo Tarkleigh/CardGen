@@ -16,31 +16,40 @@ def get_entries_from_xml(xml_tree):
         entry = {}
 
         entry["summary"] = extract_value(item, "summary")
-        entry["description"] = extract_value(item, "description")
         entry["assignee"] = extract_value(item, "assignee")
+        entry["description"] = extract_description(item)
 
         key = extract_value(item, "key")
-        split = key.split("-")
-        entry["project"] = split[0]
-        entry["key"] = split[1]
+        key_parts = key.split("-")
+        entry["project"] = key_parts[0]
+        entry["key"] = key_parts[1]
 
         entry["priority"] = extract_value(item, "priority")
         entry["rank"] = extract_rank_from_custom_fields(item)
-
-        for key in entry.keys():
-            entry[key] = remove_link_tags(entry[key])
-            entry[key] = check_and_escape(entry[key])
 
         entries.append(entry)
 
     return entries
 
 
+def extract_description(item):
+    description = extract_value(item, "description")
+    description = remove_excessive_new_lines(description)
+    return description
+
+
 def extract_value(item, key):
     value = item.find(key).text
     if value is None:
         value = ""
+    else:
+        value = sanitize_value(value)
+    return value
 
+
+def sanitize_value(value):
+    value = remove_link_tags(value)
+    value = check_and_escape(value)
     return value
 
 
@@ -91,6 +100,7 @@ def extract_rank_from_custom_fields(item):
             for values in custom_field.iter("customfieldvalue"):
                 rank = values.text
 
+    rank = sanitize_value(rank)
     return rank
 
 

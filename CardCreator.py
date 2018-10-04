@@ -1,14 +1,14 @@
-import random
 import html
+import random
+
 import reportlab.lib.pagesizes as sizes
 import reportlab.lib.units as layout_units
 import reportlab.pdfgen.canvas as pdf_canvas
 from reportlab.lib import colors as reportlab_colors
-from reportlab.platypus import Table, TableStyle
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Frame
 from reportlab.platypus import Paragraph
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-import XMLParser
+from reportlab.platypus import Table, TableStyle
 
 
 class Converter:
@@ -124,9 +124,10 @@ class Converter:
 
     def get_description_paragraph(self, entry):
         description_string = entry.get("description", '')
+
         if len(description_string) > 160:
             description_string = description_string[0:161] + '...'
-        description_string = XMLParser.remove_excessive_new_lines(description_string)
+
         try:
             description_paragraph = Paragraph(description_string, self.styles["description"])
         except ValueError:
