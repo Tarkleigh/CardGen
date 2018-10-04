@@ -96,45 +96,51 @@ class Converter:
 
         self.load_styles(text_color)
 
-        rank = entry["rank"]
-        if len(rank) >= 7:
-            rank_paragraph = Paragraph(entry["rank"], self.styles["largeRankStyle"])
-        else:
-            rank_paragraph = Paragraph(entry["rank"], self.styles[first_line_style])
-
         priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
-        desc_label_paragraph = Paragraph("Description:", self.styles["label"])
+        description_label_paragraph = Paragraph("Description:", self.styles["label"])
         key_paragraph = Paragraph(entry["key"], self.styles["summary"])
         processor_label_paragraph = Paragraph("Processor:", self.styles["label"])
 
-        description_string = entry.get("description", '')
+        rank_paragraph = self.get_rank_paragraph(entry, first_line_style)
+        description_paragraph = self.get_description_paragraph(entry)
+        processor_paragraph = self.get_processor_paragraph(assignee)
 
+        data = [[rank_paragraph, priority_paragraph],
+                [key_paragraph, summary_paragraph],
+                [description_label_paragraph, description_paragraph],
+                [processor_label_paragraph, processor_paragraph]]
+        return data
+
+    def get_processor_paragraph(self, assignee):
+        # remove "Unassigned" so people can fill out the cards themselves
+        if assignee == "Unassigned":
+            assignee = ""
+        if len(assignee) > 30:
+            processor_paragraph = Paragraph(assignee, self.styles["smallProcessor"])
+        else:
+            processor_paragraph = Paragraph(assignee, self.styles["processor"])
+        return processor_paragraph
+
+    def get_description_paragraph(self, entry):
+        description_string = entry.get("description", '')
         if len(description_string) > 160:
             description_string = description_string[0:161] + '...'
-
         description_string = XMLParser.remove_excessive_new_lines(description_string)
-
         try:
             description_paragraph = Paragraph(description_string, self.styles["description"])
         except ValueError:
             description_string = html.escape(description_string)
             description_paragraph = Paragraph(description_string, self.styles["description"])
+        return description_paragraph
 
-        # remove "Unassigned" so people can fill out the cards themselves
-        if assignee == "Unassigned":
-            assignee = ""
-
-        if len(assignee) > 30:
-            processor_paragraph = Paragraph(assignee, self.styles["smallProcessor"])
+    def get_rank_paragraph(self, entry, first_line_style):
+        rank = entry["rank"]
+        if len(rank) >= 7:
+            rank_paragraph = Paragraph(entry["rank"], self.styles["largeRankStyle"])
         else:
-            processor_paragraph = Paragraph(assignee, self.styles["processor"])
-
-        data = [[rank_paragraph, priority_paragraph],
-                [key_paragraph, summary_paragraph],
-                [desc_label_paragraph, description_paragraph],
-                [processor_label_paragraph, processor_paragraph]]
-        return data
+            rank_paragraph = Paragraph(entry["rank"], self.styles[first_line_style])
+        return rank_paragraph
 
     def load_styles(self, text_color):
         first_line_style = ParagraphStyle(name="firstLine", fontName='Helvetica-Bold',

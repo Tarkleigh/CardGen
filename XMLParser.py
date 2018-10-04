@@ -27,8 +27,6 @@ def get_entries_from_xml(xml_tree):
         entry["priority"] = extract_value(item, "priority")
         entry["rank"] = extract_rank_from_custom_fields(item)
 
-        remove_null_values(entry)
-
         for key in entry.keys():
             entry[key] = remove_link_tags(entry[key])
             entry[key] = check_and_escape(entry[key])
@@ -53,7 +51,8 @@ def initialize_tkinter():
 
 
 def check_and_escape(string):
-    # reportLab can't handle gifs (they cause a hard crash), escape if one is present
+    # reportLab can't handle gifs (they cause a hard crash), so we try to create a Paragraph
+    # and escape if this doesn't work
     try:
         Paragraph(string, getSampleStyleSheet()['BodyText'])
         return string
@@ -74,12 +73,6 @@ def remove_excessive_new_lines(string):
 
     # not too many new lines, return string unchanged
     return string
-
-
-def remove_null_values(entry):
-    for key in entry.keys():
-        if entry[key] is None:
-            entry[key] = ''
 
 
 def remove_link_tags(string):
