@@ -21,7 +21,6 @@ def get_entries_from_xml(xml_tree):
 
         key = extract_value(item, "key")
         key_parts = key.split("-")
-        entry["project"] = key_parts[0]
         entry["key"] = key_parts[1]
 
         entry["priority"] = extract_value(item, "priority")
@@ -130,8 +129,8 @@ def main():
     xml_tree = elementTree.parse(file_path)
     entries = get_entries_from_xml(xml_tree)
 
-    creator = CardCreator.Converter(output_path)
-    creator.create_pdf(entries)
+    creator = CardCreator.Converter()
+    creator.create_pdf(entries, output_path)
     open_output_file(output_path)
 
 

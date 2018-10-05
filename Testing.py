@@ -9,7 +9,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(1, 1)
 
     def testColors(self):
-        class_under_test = CardCreator.Converter("any")
+        class_under_test = CardCreator.Converter()
         class_under_test.load_colors()
         actual_colors = class_under_test.colors
 

@@ -12,39 +12,38 @@ from reportlab.platypus import Table, TableStyle
 
 
 class Converter:
-    def __init__(self, output_path):
+    def __init__(self):
         self.start_x = 10
         self.start_y = 325
         self.frame_count = 1
-        self.output_path = ""
 
         self.colors = []
         self.used_colors = {}
         self.styles = {}
         self.royal_blue = (0 / 256, 85 / 256, 164 / 256)
-        self.output_path = output_path
 
-    def create_pdf(self, entries):
+        self.UNASSIGNED = "Unassigned"
+        self.LARGE_RANK_STYLE = "largeRankStyle"
+        self.LARGE_RANK_STYLE_UNASSIGNED = "largeRankStyleUnassigned"
+        self.FIRST_LINE = "firstLine"
+        self.FIRST_LINE_UNASSIGNED = "firstLineUnassigned"
+
+    def create_pdf(self, entries, output_path):
         self.load_colors()
+        self.load_styles()
 
-        canvas = pdf_canvas.Canvas(filename=self.output_path, bottomup=1,
+        canvas = pdf_canvas.Canvas(filename=output_path, bottomup=1,
                                    pagesize=sizes.landscape(sizes.A4))
 
         for entry in entries:
-
             assignee = entry["assignee"]
-            first_line_style = "firstLine"
+            rank = entry["rank"]
 
-            if assignee == "Unassigned":
-                card_color = self.royal_blue
-                first_line_style = "firstLineStyleUnassigned"
-                text_color = reportlab_colors.white
-            else:
-                card_color = self.get_card_color(assignee)
-                text_color = reportlab_colors.black
+            card_color, first_line_style = self.get_first_line_style(assignee)
+            rank_style = self.get_rank_style(rank, assignee, first_line_style)
 
             frame_content = []
-            table_data = self.get_table_data(assignee, entry, first_line_style, text_color)
+            table_data = self.get_table_data(entry, first_line_style, rank_style)
 
             card_frame = Frame(self.start_x, self.start_y, width=14.5 * layout_units.cm,
                                height=8.5 * layout_units.cm, showBoundary=0)
@@ -66,6 +65,15 @@ class Converter:
             self.get_new_card_position(canvas)
 
         canvas.save()
+
+    def get_first_line_style(self, assignee):
+        first_line_style = self.FIRST_LINE
+        if assignee == self.UNASSIGNED:
+            card_color = self.royal_blue
+            first_line_style = self.FIRST_LINE_UNASSIGNED
+        else:
+            card_color = self.get_card_color(assignee)
+        return card_color, first_line_style
 
     def load_colors(self):
         olive = (192 / 256, 255 / 256, 62 / 256)
@@ -92,19 +100,16 @@ class Converter:
 
         return card_color
 
-    def get_table_data(self, assignee, entry, first_line_style, text_color):
-
-        self.load_styles(text_color)
-
+    def get_table_data(self, entry, first_line_style, rank_style):
         priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
         description_label_paragraph = Paragraph("Description:", self.styles["label"])
         key_paragraph = Paragraph(entry["key"], self.styles["summary"])
-        processor_label_paragraph = Paragraph("Processor:", self.styles["label"])
 
-        rank_paragraph = self.get_rank_paragraph(entry, first_line_style)
+        processor_label_paragraph = Paragraph("Processor:", self.styles["label"])
+        rank_paragraph = Paragraph(entry["rank"], self.styles[rank_style])
         description_paragraph = self.get_description_paragraph(entry)
-        processor_paragraph = self.get_processor_paragraph(assignee)
+        processor_paragraph = self.get_processor_paragraph(entry["assignee"])
 
         data = [[rank_paragraph, priority_paragraph],
                 [key_paragraph, summary_paragraph],
@@ -114,7 +119,7 @@ class Converter:
 
     def get_processor_paragraph(self, assignee):
         # remove "Unassigned" so people can fill out the cards themselves
-        if assignee == "Unassigned":
+        if assignee == self.UNASSIGNED:
             assignee = ""
         if len(assignee) > 30:
             processor_paragraph = Paragraph(assignee, self.styles["smallProcessor"])
@@ -135,29 +140,37 @@ class Converter:
             description_paragraph = Paragraph(description_string, self.styles["description"])
         return description_paragraph
 
-    def get_rank_paragraph(self, entry, first_line_style):
-        rank = entry["rank"]
+    def get_rank_style(self, rank, assignee, first_line_style):
         if len(rank) >= 7:
-            rank_paragraph = Paragraph(entry["rank"], self.styles["largeRankStyle"])
+            if assignee == self.UNASSIGNED:
+                rank_style = self.LARGE_RANK_STYLE_UNASSIGNED
+            else:
+                rank_style = self.LARGE_RANK_STYLE
         else:
-            rank_paragraph = Paragraph(entry["rank"], self.styles[first_line_style])
-        return rank_paragraph
+            rank_style = first_line_style
+        return rank_style
 
-    def load_styles(self, text_color):
-        first_line_style = ParagraphStyle(name="firstLine", fontName='Helvetica-Bold',
+    def load_styles(self):
+        first_line_style = ParagraphStyle(name=self.FIRST_LINE, fontName='Helvetica-Bold',
                                           fontSize=18, alignment=0)
-        self.styles["firstLine"] = first_line_style
+        self.styles[self.FIRST_LINE] = first_line_style
 
-        first_line_style_unassigned = ParagraphStyle(name="firstLineUnassigned",
+        first_line_style_unassigned = ParagraphStyle(name=self.FIRST_LINE_UNASSIGNED,
                                                      fontName='Helvetica-Bold', fontSize=18,
                                                      alignment=0, textColor=reportlab_colors.white)
-        self.styles["firstLineStyleUnassigned"] = first_line_style_unassigned
+        self.styles[self.FIRST_LINE_UNASSIGNED] = first_line_style_unassigned
 
-        large_rank_style = ParagraphStyle(name="largeRankStyle",
+        large_rank_style = ParagraphStyle(name=self.LARGE_RANK_STYLE,
                                           fontName='Helvetica-Bold', fontSize=13,
-                                          alignment=0, textColor=text_color)
+                                          alignment=0)
 
-        self.styles["largeRankStyle"] = large_rank_style
+        self.styles[self.LARGE_RANK_STYLE] = large_rank_style
+
+        large_rank_style_unassigned = ParagraphStyle(name=self.LARGE_RANK_STYLE_UNASSIGNED,
+                                                     fontName='Helvetica-Bold', fontSize=13,
+                                                     alignment=0, textColor=reportlab_colors.white)
+
+        self.styles[self.LARGE_RANK_STYLE_UNASSIGNED] = large_rank_style_unassigned
 
         summary_style = ParagraphStyle(name="summary", fontName='Helvetica-Bold',
                                        fontSize=22, alignment=0, leading=22)
