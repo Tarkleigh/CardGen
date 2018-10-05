@@ -12,6 +12,7 @@ from reportlab.platypus import Table, TableStyle
 
 
 class Converter:
+
     def __init__(self):
         self.start_x = 10
         self.start_y = 325
@@ -36,35 +37,40 @@ class Converter:
                                    pagesize=sizes.landscape(sizes.A4))
 
         for entry in entries:
-            assignee = entry["assignee"]
-            rank = entry["rank"]
-
-            card_color, first_line_style = self.get_first_line_style(assignee)
-            rank_style = self.get_rank_style(rank, assignee, first_line_style)
-
-            frame_content = []
-            table_data = self.get_table_data(entry, first_line_style, rank_style)
-
-            card_frame = Frame(self.start_x, self.start_y, width=14.5 * layout_units.cm,
-                               height=8.5 * layout_units.cm, showBoundary=0)
-
-            card_style = TableStyle([('BACKGROUND', (0, 0), (1, 0), card_color),
-                                     ('VALIGN', (0, 0), (1, 0), "MIDDLE"),
-                                     ('BOTTOMPADDING', (0, 0), (1, 0), 14),
-                                     ('VALIGN', (0, 1), (-1, -1), "TOP"),
-                                     ('INNERGRID', (0, 0), (-1, -1), 0.9, reportlab_colors.black),
-                                     ('BOX', (0, 0), (-1, -1), 0.9, reportlab_colors.black)])
-
-            table = Table(data=table_data, colWidths=[2.7 * layout_units.cm, 11.3 * layout_units.cm],
-                          rowHeights=[1.2 * layout_units.cm, 3.4 * layout_units.cm,
-                                      2.1 * layout_units.cm, 1.2 * layout_units.cm])
-            table.setStyle(card_style)
-
-            frame_content.append(table)
-            card_frame.addFromList(frame_content, canvas)
-            self.get_new_card_position(canvas)
+            self.build_card_for_entry(canvas, entry)
 
         canvas.save()
+
+    def build_card_for_entry(self, canvas, entry):
+        assignee = entry["assignee"]
+        rank = entry["rank"]
+
+        card_color, first_line_style = self.get_first_line_style(assignee)
+        rank_style = self.get_rank_style(rank, assignee, first_line_style)
+
+        frame_content = []
+
+        table_data = self.get_table_data(entry, first_line_style, rank_style)
+
+        card_frame = Frame(self.start_x, self.start_y, width=14.5 * layout_units.cm,
+                           height=8.5 * layout_units.cm, showBoundary=0)
+
+        card_style = TableStyle([('BACKGROUND', (0, 0), (1, 0), card_color),
+                                 ('VALIGN', (0, 0), (1, 0), "MIDDLE"),
+                                 ('BOTTOMPADDING', (0, 0), (1, 0), 14),
+                                 ('VALIGN', (0, 1), (-1, -1), "TOP"),
+                                 ('INNERGRID', (0, 0), (-1, -1), 0.9, reportlab_colors.black),
+                                 ('BOX', (0, 0), (-1, -1), 0.9, reportlab_colors.black)])
+        table = Table(data=table_data,
+                      colWidths=[2.7 * layout_units.cm, 11.3 * layout_units.cm],
+                      rowHeights=[1.2 * layout_units.cm, 3.4 * layout_units.cm,
+                                  2.1 * layout_units.cm, 1.2 * layout_units.cm])
+        table.setStyle(card_style)
+
+        frame_content.append(table)
+        card_frame.addFromList(frame_content, canvas)
+
+        self.get_new_card_position(canvas)
 
     def get_first_line_style(self, assignee):
         first_line_style = self.FIRST_LINE
@@ -121,6 +127,7 @@ class Converter:
         # remove "Unassigned" so people can fill out the cards themselves
         if assignee == self.UNASSIGNED:
             assignee = ""
+
         if len(assignee) > 30:
             processor_paragraph = Paragraph(assignee, self.styles["smallProcessor"])
         else:
