@@ -12,6 +12,11 @@ from reportlab.platypus import Table, TableStyle
 
 
 class Converter:
+    UNASSIGNED = "Unassigned"
+    LARGE_RANK_STYLE = "largeRankStyle"
+    LARGE_RANK_STYLE_UNASSIGNED = "largeRankStyleUnassigned"
+    FIRST_LINE = "firstLine"
+    FIRST_LINE_UNASSIGNED = "firstLineUnassigned"
 
     def __init__(self):
         self.start_x = 10
@@ -22,12 +27,6 @@ class Converter:
         self.used_colors = {}
         self.styles = {}
         self.royal_blue = (0 / 256, 85 / 256, 164 / 256)
-
-        self.UNASSIGNED = "Unassigned"
-        self.LARGE_RANK_STYLE = "largeRankStyle"
-        self.LARGE_RANK_STYLE_UNASSIGNED = "largeRankStyleUnassigned"
-        self.FIRST_LINE = "firstLine"
-        self.FIRST_LINE_UNASSIGNED = "firstLineUnassigned"
 
     def create_pdf(self, entries, output_path):
         self.load_colors()
@@ -158,45 +157,48 @@ class Converter:
         return rank_style
 
     def load_styles(self):
-        first_line_style = ParagraphStyle(name=self.FIRST_LINE, fontName='Helvetica-Bold',
+        standard_font = "Helvetica"
+        standard_font_bold = "Helvetica-Bold"
+
+        first_line_style = ParagraphStyle(name=self.FIRST_LINE, fontName=standard_font_bold,
                                           fontSize=18, alignment=0)
-        self.styles[self.FIRST_LINE] = first_line_style
 
         first_line_style_unassigned = ParagraphStyle(name=self.FIRST_LINE_UNASSIGNED,
-                                                     fontName='Helvetica-Bold', fontSize=18,
+                                                     fontName=standard_font_bold, fontSize=18,
                                                      alignment=0, textColor=reportlab_colors.white)
-        self.styles[self.FIRST_LINE_UNASSIGNED] = first_line_style_unassigned
 
         large_rank_style = ParagraphStyle(name=self.LARGE_RANK_STYLE,
-                                          fontName='Helvetica-Bold', fontSize=13,
+                                          fontName=standard_font_bold, fontSize=13,
                                           alignment=0)
 
-        self.styles[self.LARGE_RANK_STYLE] = large_rank_style
-
         large_rank_style_unassigned = ParagraphStyle(name=self.LARGE_RANK_STYLE_UNASSIGNED,
-                                                     fontName='Helvetica-Bold', fontSize=13,
+                                                     fontName=standard_font_bold, fontSize=13,
                                                      alignment=0, textColor=reportlab_colors.white)
 
-        self.styles[self.LARGE_RANK_STYLE_UNASSIGNED] = large_rank_style_unassigned
-
-        summary_style = ParagraphStyle(name="summary", fontName='Helvetica-Bold',
+        summary_style = ParagraphStyle(name="summary", fontName=standard_font_bold,
                                        fontSize=22, alignment=0, leading=22)
+
+        description_style = ParagraphStyle(name="description", fontName=standard_font,
+                                           fontSize=11, alignment=0, leading=12)
+
+        processor_style = ParagraphStyle(name="processor", fontName=standard_font_bold,
+                                         fontSize=20, alignment=0)
+
+        small_processor_style = ParagraphStyle(name="smallProcessor", fontName=standard_font_bold,
+                                               fontSize=15, alignment=0)
+
+        label_style = ParagraphStyle(name="label", fontName=standard_font,
+                                     fontSize=12, alignment=0, leftIndent=0)
+
+        self.styles[self.FIRST_LINE] = first_line_style
+        self.styles[self.FIRST_LINE_UNASSIGNED] = first_line_style_unassigned
+        self.styles[self.LARGE_RANK_STYLE] = large_rank_style
+        self.styles[self.LARGE_RANK_STYLE_UNASSIGNED] = large_rank_style_unassigned
         self.styles["summary"] = summary_style
 
-        description_style = ParagraphStyle(name="description", fontName='Helvetica',
-                                           fontSize=11, alignment=0, leading=12)
         self.styles["description"] = description_style
-
-        processor_style = ParagraphStyle(name="processor", fontName='Helvetica-Bold',
-                                         fontSize=20, alignment=0)
         self.styles["processor"] = processor_style
-
-        small_processor_style = ParagraphStyle(name="smallProcessor", fontName='Helvetica-Bold',
-                                               fontSize=15, alignment=0)
         self.styles["smallProcessor"] = small_processor_style
-
-        label_style = ParagraphStyle(name="label", fontName='Helvetica',
-                                     fontSize=12, alignment=0, leftIndent=0)
         self.styles["label"] = label_style
 
     def get_new_card_position(self, canvas):
