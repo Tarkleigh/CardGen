@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 import xml.etree.ElementTree as elementTree
-import CardCreator
+import card_generator
 
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
@@ -129,7 +129,7 @@ def main():
     xml_tree = elementTree.parse(file_path)
     entries = get_entries_from_xml(xml_tree)
 
-    creator = CardCreator.Converter()
+    creator = card_generator.Generator()
     creator.create_pdf(entries, output_path)
     open_output_file(output_path)
 

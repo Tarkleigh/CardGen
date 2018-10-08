@@ -11,12 +11,13 @@ from reportlab.platypus import Paragraph
 from reportlab.platypus import Table, TableStyle
 
 
-class Converter:
+class Generator:
     UNASSIGNED = "Unassigned"
     LARGE_RANK_STYLE = "largeRankStyle"
     LARGE_RANK_STYLE_UNASSIGNED = "largeRankStyleUnassigned"
     FIRST_LINE = "firstLine"
     FIRST_LINE_UNASSIGNED = "firstLineUnassigned"
+    ROYAL_BLUE = (0 / 256, 85 / 256, 164 / 256)
 
     def __init__(self):
         self.start_x = 10
@@ -26,7 +27,6 @@ class Converter:
         self.colors = []
         self.used_colors = {}
         self.styles = {}
-        self.royal_blue = (0 / 256, 85 / 256, 164 / 256)
 
     def create_pdf(self, entries, output_path):
         self.load_colors()
@@ -74,7 +74,7 @@ class Converter:
     def get_first_line_style(self, assignee):
         first_line_style = self.FIRST_LINE
         if assignee == self.UNASSIGNED:
-            card_color = self.royal_blue
+            card_color = self.ROYAL_BLUE
             first_line_style = self.FIRST_LINE_UNASSIGNED
         else:
             card_color = self.get_card_color(assignee)
