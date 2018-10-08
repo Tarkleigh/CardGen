@@ -78,6 +78,23 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(card_color, class_under_test.ROYAL_BLUE)
         self.assertEqual(line_style, class_under_test.FIRST_LINE_UNASSIGNED)
 
+    def test_get_color(self):
+        class_under_test = card_generator.Generator()
+        assignee = "Meyer, Max"
+
+        # set color to hot pink
+        hot_pink = (255 / 256, 110 / 256, 180 / 256)
+        gold = (255 / 256, 236 / 256, 139 / 256)
+        class_under_test.colors = [hot_pink]
+
+        chosen_color = class_under_test.get_card_color(assignee)
+        self.assertEqual(chosen_color, hot_pink)
+
+        # re-set colors
+        class_under_test.colors = [gold]
+        chosen_color = class_under_test.get_card_color(assignee)
+        self.assertEqual(chosen_color, hot_pink)
+
 
 if __name__ == '__main__':
     unittest.main()
