@@ -3,10 +3,11 @@ import os
 import subprocess
 import sys
 import xml.etree.ElementTree as elementTree
-import card_generator
 
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
+
+import card_generator
 
 
 def get_entries_from_xml(xml_tree):
@@ -34,6 +35,14 @@ def get_entries_from_xml(xml_tree):
 def extract_description(item):
     description = extract_value(item, "description")
     description = remove_excessive_new_lines(description)
+    description = trim_description(description)
+
+    return description
+
+
+def trim_description(description):
+    if len(description) > 160:
+        description = description[0:161] + '...'
     return description
 
 

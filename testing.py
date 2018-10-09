@@ -34,6 +34,18 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(actual_string, expected_result)
 
+    def test_description_trimming(self):
+        test_string = "A very long description of a very important backlog item" \
+                      " that will never fit on the card and has to be trimmed so it does" \
+                      "disrupt the layout. The cut-off point is 160 characters."
+
+        original_length = len(test_string)
+
+        trimmed_description = xml_parser.trim_description(test_string)
+        trimmed_length = len(trimmed_description)
+        self.assertLess(trimmed_length, original_length)
+        self.assertLess(trimmed_length, 165)
+
 
 class GeneratorTests(unittest.TestCase):
 

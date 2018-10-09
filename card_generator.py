@@ -136,9 +136,6 @@ class Generator:
     def get_description_paragraph(self, entry):
         description_string = entry.get("description", '')
 
-        if len(description_string) > 160:
-            description_string = description_string[0:161] + '...'
-
         try:
             description_paragraph = Paragraph(description_string, self.styles["description"])
         except ValueError:
