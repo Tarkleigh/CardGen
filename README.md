@@ -5,8 +5,8 @@ the backlog item. The Card Generator prints more information and color-codes the
 – check the “Examples” folder for some examples on how the cards look like. Input is an xml file containing the 
 backlog items, which is easily obtainable using the Jira Issue Navigator.
 
-![Example](https://github.com/Tarkleigh/CardGen/blob/master/examples/CardGen%20Screenshot.PNG)
-![Second Example](https://github.com/Tarkleigh/CardGen/blob/master/examples/CardGen%20Screenshot%202.PNG)
+![Example](https://github.com/Tarkleigh/CardGen/blob/master/examples/ExampleScreenshot.PNG)
+
 
 ## Features
 *	Generates cards containing title, rank, description, key of a backlog item and the person assigned to it – if any
