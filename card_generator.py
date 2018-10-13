@@ -1,3 +1,5 @@
+"""Creates a pdf with cards for passed backlog items - use xml_parser.py module to read the
+backlog items from an xml file and get the required format for this module."""
 import html
 import random
 
@@ -12,6 +14,10 @@ from reportlab.platypus import Table, TableStyle
 
 
 class Generator:
+    """Use to create a pdf file containing cards for each backlog items.
+    The only method users should use is create_pdf, any others are used
+    internally."""
+
     UNASSIGNED = "Unassigned"
     LARGE_RANK_STYLE = "largeRankStyle"
     LARGE_RANK_STYLE_UNASSIGNED = "largeRankStyleUnassigned"
@@ -29,6 +35,7 @@ class Generator:
         self.styles = {}
 
     def create_pdf(self, entries, output_path):
+        """Create the output pdf file."""
         self.load_colors()
         self.load_styles()
 
@@ -41,6 +48,7 @@ class Generator:
         canvas.save()
 
     def build_card_for_entry(self, canvas, entry):
+        """Create a card for the given backlog item."""
         assignee = entry["assignee"]
         rank = entry["rank"]
 
@@ -72,6 +80,7 @@ class Generator:
         self.get_new_card_position(canvas)
 
     def get_first_line_style(self, assignee):
+        """Get the style used for the first line of a card."""
         first_line_style = self.FIRST_LINE
         if assignee == self.UNASSIGNED:
             card_color = self.ROYAL_BLUE
@@ -81,6 +90,7 @@ class Generator:
         return card_color, first_line_style
 
     def load_colors(self):
+        """Load the colors used for generated cards."""
         olive = (192 / 256, 255 / 256, 62 / 256)
         light_blue = (135 / 256, 206 / 256, 250 / 256)
         hot_pink = (255 / 256, 110 / 256, 180 / 256)
@@ -96,6 +106,7 @@ class Generator:
                        pale_green, light_grey, dark_turquoise, dark_orange, medium_purple]
 
     def get_card_color(self, assignee):
+        """Get the color used for this assignee."""
         if assignee in self.used_colors:
             card_color = self.used_colors[assignee]
         else:
@@ -106,6 +117,7 @@ class Generator:
         return card_color
 
     def get_table_data(self, entry, first_line_style, rank_style):
+        """Put all card elements together to create a table for reportlab to render."""
         priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
         description_label_paragraph = Paragraph("Description:", self.styles["label"])
@@ -123,6 +135,7 @@ class Generator:
         return data
 
     def get_processor_paragraph(self, assignee):
+        """Get paragraph style used for processor field."""
         # remove "Unassigned" so people can fill out the cards themselves
         if assignee == self.UNASSIGNED:
             assignee = ""
@@ -134,6 +147,7 @@ class Generator:
         return processor_paragraph
 
     def get_description_paragraph(self, entry):
+        """Get paragraph style used for description field."""
         description_string = entry.get("description", '')
 
         try:
@@ -144,6 +158,7 @@ class Generator:
         return description_paragraph
 
     def get_rank_style(self, rank, assignee, first_line_style):
+        """Get style for rank field."""
         if len(rank) >= 7:
             if assignee == self.UNASSIGNED:
                 rank_style = self.LARGE_RANK_STYLE_UNASSIGNED
@@ -154,6 +169,7 @@ class Generator:
         return rank_style
 
     def load_styles(self):
+        """Prepare the different font styles used for the card elements."""
         standard_font = "Helvetica"
         standard_font_bold = "Helvetica-Bold"
 
@@ -199,6 +215,7 @@ class Generator:
         self.styles["label"] = label_style
 
     def get_new_card_position(self, canvas):
+        """Get the position for the next card so four cards fit on a page."""
         if self.frame_count == 1:
             self.frame_count += 1
             self.start_x += 410

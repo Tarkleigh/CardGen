@@ -1,11 +1,14 @@
+"""Test module for CardGen project."""
 import unittest
 import xml_parser
 import card_generator
 
 
 class ParserTests(unittest.TestCase):
+    """Test class for xml_parser.py."""
 
     def test_link_removal(self):
+        """Test removal of link tags from strings."""
         class_under_test = xml_parser
         test_string = "Text<a href=bla></a>moreText"
         expected_string = "Text <i>link</i> moreText"
@@ -14,6 +17,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(expected_string, actual_string)
 
     def test_complex_link_removal(self):
+        """Test removal of link tags with unfilled tag."""
         test_string = "Text<a href=bla></a>moreText<a href=www.google.com></a>"
         expected_string = "Text <i>link</i> moreText <i>link</i> "
         actual_string = xml_parser.remove_link_tags(test_string)
@@ -21,6 +25,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(expected_string, actual_string)
 
     def test_link_removal_with_alternative_tag(self):
+        """Test removal of link tags with alternative tag format."""
         test_string = "Text <a name=noHyperLink></a> moreText<a href=importantTag></a>"
         expected_string = "Text <a name=noHyperLink></a> moreText <i>link</i> "
         actual_string = xml_parser.remove_link_tags(test_string)
@@ -28,6 +33,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(expected_string, actual_string)
 
     def test_line_removal(self):
+        """Test removal of excessive new lines."""
         test_string = "A text \n with \n too \n many \n new \n lines"
         expected_result = "A text \n with \n too \n many "
         actual_string = xml_parser.remove_excessive_new_lines(test_string)
@@ -35,6 +41,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(actual_string, expected_result)
 
     def test_description_trimming(self):
+        """Test trimming of long descriptions."""
         test_string = "A very long description of a very important backlog item" \
                       " that will never fit on the card and has to be trimmed so it does" \
                       "disrupt the layout. The cut-off point is 160 characters."
@@ -48,8 +55,10 @@ class ParserTests(unittest.TestCase):
 
 
 class GeneratorTests(unittest.TestCase):
+    """Test class for card_generator.py."""
 
     def test_colors(self):
+        """Test that all ten supported colors are there."""
         class_under_test = card_generator.Generator()
         class_under_test.load_colors()
         actual_colors = class_under_test.colors
@@ -57,6 +66,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(len(actual_colors), 10)
 
     def test_rank_style_choice(self):
+        """Test correct rank style choice for old rank format."""
         class_under_test = card_generator.Generator()
         short_rank = "774"
         assignee = "Meyer, Max"
@@ -71,6 +81,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(rank_style, first_line_style)
 
     def test_rank_style_choice_with_lexo_rank(self):
+        """Test correct rank style choice for new lexo rank format."""
         class_under_test = card_generator.Generator()
         assignee = "Meyer, Max"
         lexo_rank = "0|hzzzz7:"
@@ -85,12 +96,14 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(rank_style, class_under_test.LARGE_RANK_STYLE_UNASSIGNED)
 
     def test_color_choice_for_unassigned(self):
+        """Test color choice for unassigned items."""
         class_under_test = card_generator.Generator()
         card_color, line_style = class_under_test.get_first_line_style(class_under_test.UNASSIGNED)
         self.assertEqual(card_color, class_under_test.ROYAL_BLUE)
         self.assertEqual(line_style, class_under_test.FIRST_LINE_UNASSIGNED)
 
     def test_get_color(self):
+        """Test color choice for assigned items."""
         class_under_test = card_generator.Generator()
         assignee = "Meyer, Max"
 
