@@ -181,7 +181,7 @@ class Generator:
                                                      alignment=0, textColor=reportlab_colors.white)
 
         large_rank_style = ParagraphStyle(name=self.LARGE_RANK_STYLE,
-                                          fontName=standard_font_bold, fontSize=13,
+                                          fontName=standard_font_bold, fontSize=12.3,
                                           alignment=0)
 
         large_rank_style_unassigned = ParagraphStyle(name=self.LARGE_RANK_STYLE_UNASSIGNED,
