@@ -1,6 +1,4 @@
 # CardGen
-MIT License - see LICENSE.txt for details
-
 A simple Python script to create great-looking cards from Jira for teams who want a physical Scrum board. 
 While Jira supports printing backlog items out of the box, the support is very limited – it just prints the name of
 the backlog item. The Card Generator prints more information and color-codes the cards depending on the assigned person
