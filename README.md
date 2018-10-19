@@ -36,7 +36,7 @@ Simply export the whole sprint data and feed the file into the Card Generator.
 *	Get the XML
 *	Run python xml_parser.py <path of xml file>
 
-Done, the create PDF should open automatically. It is created right next to the input file.
+Done, the created PDF should open automatically. It is created right next to the input file.
 
 ## Binary Releases
 The “dist” folder contains pre-compiled versions for Mac OS and Windows 10. They should work but are not as portable 
