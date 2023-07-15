@@ -1,5 +1,5 @@
 """Creates a pdf with cards for passed backlog items - use xml_parser.py module to read the
-backlog items from an xml file and get the required format for this module."""
+backlog items from a xml file and get the required format for this module."""
 import html
 import random
 
@@ -34,7 +34,7 @@ class Generator:
         self.used_colors = {}
         self.styles = {}
 
-    def create_pdf(self, entries, output_path):
+    def create_pdf(self, entries: list, output_path: str):
         """Create the output pdf file."""
         self.load_colors()
         self.load_styles()
@@ -47,7 +47,7 @@ class Generator:
 
         canvas.save()
 
-    def build_card_for_entry(self, canvas, entry):
+    def build_card_for_entry(self, canvas: pdf_canvas.Canvas, entry: dict):
         """Create a card for the given backlog item."""
         assignee = entry["assignee"]
         rank = entry["rank"]
@@ -79,7 +79,7 @@ class Generator:
 
         self.get_new_card_position(canvas)
 
-    def get_first_line_style(self, assignee):
+    def get_first_line_style(self, assignee: str) -> (tuple, str):
         """Get the style used for the first line of a card."""
         first_line_style = self.FIRST_LINE
         if assignee == self.UNASSIGNED:
@@ -105,7 +105,7 @@ class Generator:
         self.colors = [olive, light_blue, hot_pink, gold, salmon,
                        pale_green, light_grey, dark_turquoise, dark_orange, medium_purple]
 
-    def get_card_color(self, assignee):
+    def get_card_color(self, assignee: str):
         """Get the color used for this assignee."""
         if assignee in self.used_colors:
             card_color = self.used_colors[assignee]
@@ -116,7 +116,7 @@ class Generator:
 
         return card_color
 
-    def get_table_data(self, entry, first_line_style, rank_style):
+    def get_table_data(self, entry: dict, first_line_style: str, rank_style: str) -> list:
         """Put all card elements together to create a table for reportlab to render."""
         priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
@@ -134,7 +134,7 @@ class Generator:
                 [processor_label_paragraph, processor_paragraph]]
         return data
 
-    def get_processor_paragraph(self, assignee):
+    def get_processor_paragraph(self, assignee: str) -> Paragraph:
         """Get paragraph style used for processor field."""
         # remove "Unassigned" so people can fill out the cards themselves
         if assignee == self.UNASSIGNED:
@@ -146,7 +146,7 @@ class Generator:
             processor_paragraph = Paragraph(assignee, self.styles["processor"])
         return processor_paragraph
 
-    def get_description_paragraph(self, entry):
+    def get_description_paragraph(self, entry: dict) -> Paragraph:
         """Get paragraph style used for description field."""
         description_string = entry.get("description", '')
 
@@ -157,7 +157,7 @@ class Generator:
             description_paragraph = Paragraph(description_string, self.styles["description"])
         return description_paragraph
 
-    def get_rank_style(self, rank, assignee, first_line_style):
+    def get_rank_style(self, rank: str, assignee: str, first_line_style: str):
         """Get style for rank field."""
         if len(rank) >= 7:
             if assignee == self.UNASSIGNED:
@@ -214,7 +214,7 @@ class Generator:
         self.styles["smallProcessor"] = small_processor_style
         self.styles["label"] = label_style
 
-    def get_new_card_position(self, canvas):
+    def get_new_card_position(self, canvas: pdf_canvas.Canvas):
         """Get the position for the next card so four cards fit on a page."""
         if self.frame_count == 1:
             self.frame_count += 1
