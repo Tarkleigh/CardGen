@@ -34,7 +34,7 @@ class Generator:
         self.used_colors = {}
         self.styles = {}
 
-    def create_pdf(self, entries: list, output_path: str):
+    def create_pdf(self, entries: list[dict[str, str]], output_path: str):
         """Create the output pdf file."""
         self.load_colors()
         self.load_styles()
@@ -47,7 +47,7 @@ class Generator:
 
         canvas.save()
 
-    def build_card_for_entry(self, canvas: pdf_canvas.Canvas, entry: dict):
+    def build_card_for_entry(self, canvas: pdf_canvas.Canvas, entry: dict[str, str]):
         """Create a card for the given backlog item."""
         assignee = entry["assignee"]
         rank = entry["rank"]
@@ -79,7 +79,7 @@ class Generator:
 
         self.get_new_card_position(canvas)
 
-    def get_first_line_style(self, assignee: str) -> (tuple, str):
+    def get_first_line_style(self, assignee: str) -> (tuple[float, float, float], str):
         """Get the style used for the first line of a card."""
         first_line_style = self.FIRST_LINE
         if assignee == self.UNASSIGNED:
@@ -116,7 +116,7 @@ class Generator:
 
         return card_color
 
-    def get_table_data(self, entry: dict, first_line_style: str, rank_style: str) -> list:
+    def get_table_data(self, entry: dict[str, str], first_line_style: str, rank_style: str) -> list[list[Paragraph]]:
         """Put all card elements together to create a table for reportlab to render."""
         priority_paragraph = Paragraph(entry["priority"], self.styles[first_line_style])
         summary_paragraph = Paragraph(entry["summary"], self.styles["summary"])
@@ -146,7 +146,7 @@ class Generator:
             processor_paragraph = Paragraph(assignee, self.styles["processor"])
         return processor_paragraph
 
-    def get_description_paragraph(self, entry: dict) -> Paragraph:
+    def get_description_paragraph(self, entry: dict[str, str]) -> Paragraph:
         """Get paragraph style used for description field."""
         description_string = entry.get("description", '')
 
